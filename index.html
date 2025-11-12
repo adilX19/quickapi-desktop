@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com; 
+                       connect-src 'self' *">
+    <title>QuickAPI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            user-select: text;
+        }
+
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #2d3748;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #718096;
+        }
+
+        /* --- Loader Animation --- */
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loader {
+            animation: spin 1s linear infinite;
+        }
+
+        /* --- Hide number input arrows --- */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* --- NEW: Tab Bar Styles --- */
+        .tab-button {
+            background-color: #2d3748;
+            /* gray-800 */
+            color: #90cdf4;
+            /* blue-300 */
+            border-bottom: 2px solid transparent;
+            opacity: 0.7;
+        }
+
+        .tab-button.active {
+            background-color: #1a202c;
+            /* gray-900 */
+            border-bottom-color: #63b3ed;
+            /* blue-400 */
+            opacity: 1;
+        }
+
+        .tab-close-btn {
+            font-weight: bold;
+            font-size: 1.1rem;
+            line-height: 1;
+            padding: 0 4px;
+            margin-left: 8px;
+            border-radius: 4px;
+        }
+
+        .tab-close-btn:hover {
+            background-color: #4a5568;
+            /* gray-600 */
+            color: #fff;
+        }
+
+        .tab-duplicate-btn {
+            font-weight: bold;
+            font-size: 1.1rem;
+            line-height: 1;
+            padding: 0 4px;
+            margin-left: 6px;
+            border-radius: 4px;
+        }
+
+        .tab-duplicate-btn:hover {
+            background-color: #4a5568;
+            /* gray-600 */
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white h-screen flex flex-col antialiased">
+
+    <header class="bg-gray-800 border-b border-gray-700 px-4 py-3 shadow-md">
+        <h1 class="text-xl font-bold text-white flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-400" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M11 4a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1H9a1 1 0 110-2h1V5a1 1 0 011-1zM4.75 11a1 1 0 011-1h1.5a1 1 0 110 2h-1.5a1 1 0 01-1-1zM4 18a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zM11 18a1 1 0 011-1h1a1 1 0 110 2h-1a1 1 0 01-1-1zM18.75 11a1 1 0 011-1h1.5a1 1 0 110 2h-1.5a1 1 0 01-1-1zM18 5a1 1 0 011-1h1a1 1 0 110 2h-1a1 1 0 01-1-1zM13 4a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1V5a1 1 0 011-1zM13 18a1 1 0 011-1h1a1 1 0 110 2h-1a1 1 0 01-1-1z" />
+            </svg>
+            QuickAPI
+        </h1>
+    </header>
+
+    <div id="tab-bar-container"
+        class="flex-shrink-0 flex items-center bg-gray-800 border-b border-gray-700 px-2 pt-1 space-x-1 overflow-x-auto">
+        <button id="add-tab-btn"
+            class="text-white bg-gray-700 hover:bg-gray-600 rounded-md px-3 py-1 text-lg font-bold leading-none mb-1"
+            title="New Tab">+</button>
+    </div>
+
+    <main id="tab-content-container" class="flex-grow overflow-hidden relative">
+    </main>
+
+
+    <template id="tab-template">
+        <div class="tab-content-panel p-4 space-y-4 h-full flex flex-col overflow-hidden">
+
+            <div class="flex space-x-2">
+                <select
+                    class="request-method bg-gray-700 border border-gray-600 rounded-md px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option>GET</option>
+                    <option>POST</option>
+                    <option>PUT</option>
+                    <option>PATCH</option>
+                    <option>DELETE</option>
+                    <option>OPTIONS</option>
+                    <option>HEAD</option>
+                </select>
+                <input
+                    class="request-url flex-grow bg-gray-800 border border-gray-700 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500"
+                    type="text" placeholder="https://api.example.com/data">
+                <button
+                    class="send-button bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors flex items-center justify-center min-w-[100px]">
+                    <span class="send-text">Send</span>
+                    <svg class="send-loader loader h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4 overflow-hidden min-h-0">
+                <div class="flex flex-col bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+                    <h2 class="text-lg font-semibold p-3 border-b border-gray-700">Request</h2>
+                    <div class="flex border-b border-gray-700">
+                        <button class="req-tab-btn px-4 py-2 bg-gray-800 border-r border-gray-700 text-blue-400"
+                            data-tab="headers">Headers</button>
+                        <button class="req-tab-btn px-4 py-2 bg-gray-900 text-gray-400" data-tab="body">Body</button>
+                    </div>
+                    <div class="flex-grow p-3 overflow-auto">
+                        <div class="tab-content-headers req-tab-content h-full space-y-2">
+                            <div class="headers-list">
+                            </div>
+                            <button class="add-header-btn text-sm text-blue-400 hover:text-blue-300 font-medium">+ Add
+                                Header</button>
+                        </div>
+                        <div class="tab-content-body req-tab-content h-full hidden">
+                            <textarea
+                                class="request-body w-full h-full bg-gray-900 border border-gray-700 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm resize-none"
+                                placeholder="Enter request body (e.g., JSON)"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+                    <div class="flex items-center justify-between p-3 border-b border-gray-700">
+                        <h2 class="text-lg font-semibold">Response</h2>
+                        <div class="flex space-x-4 text-sm">
+                            <span class="response-status font-medium"></span>
+                            <span class="response-time text-gray-400"></span>
+                            <span class="response-size text-gray-400"></span>
+                        </div>
+                    </div>
+                    <div class="flex border-b border-gray-700">
+                        <button class="res-tab-btn px-4 py-2 bg-gray-800 border-r border-gray-700 text-blue-400"
+                            data-tab="res-body">Body</button>
+                        <button class="res-tab-btn px-4 py-2 bg-gray-900 text-gray-400"
+                            data-tab="res-headers">Headers</button>
+                    </div>
+                    <div class="flex-grow p-3 overflow-auto">
+                        <div class="tab-content-res-body res-tab-content h-full">
+                            <pre
+                                class="response-body w-full h-full bg-gray-900 rounded-md p-2 text-sm overflow-auto whitespace-pre-wrap break-words font-mono"></pre>
+                        </div>
+                        <div class="tab-content-res-headers res-tab-content h-full hidden">
+                            <pre
+                                class="response-headers w-full h-full bg-gray-900 rounded-md p-2 text-sm overflow-auto whitespace-pre-wrap break-words font-mono"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="./renderer.js"></script>
+</body>
+
+</html>
